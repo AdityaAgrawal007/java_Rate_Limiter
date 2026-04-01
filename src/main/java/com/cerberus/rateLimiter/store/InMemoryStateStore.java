@@ -25,6 +25,7 @@ public class InMemoryStateStore implements StateStore {
 
             // client does not exists
             if (existingValue == null) {
+//                System.out.println("Hello from new client creator");
                 WindowState new_client = new WindowState(System.currentTimeMillis() / 1000, 1);
                 long remainingTokens = tokenLimit - new_client.count();
                 RateLimitResult result = new RateLimitResult(true, new_client.startTimestamp() + timeWindow.get(ChronoUnit.SECONDS), remainingTokens);
@@ -32,6 +33,7 @@ public class InMemoryStateStore implements StateStore {
                 return new_client;
             }
 
+//            System.out.println("sanity check");
             // if client makes request after timeWindow
             if ((currentTime - existingValue.startTimestamp()) >= timeWindow.get(ChronoUnit.SECONDS)) {
 //              long newStartTimestamp = map.get(clientKey).startTimestamp() + timeWindow.get(ChronoUnit.SECONDS);
@@ -47,19 +49,20 @@ public class InMemoryStateStore implements StateStore {
 
             // if client makes request within timeWindow
             else {
+//                System.out.println("count: " + existingValue.count());
                 // if client does not have enough tokens
                 if ((existingValue.count() + 1) > tokenLimit) {
                     long resetTimeStamp = existingValue.startTimestamp() + timeWindow.get(ChronoUnit.SECONDS);
                     RateLimitResult result = new RateLimitResult(false, resetTimeStamp, tokenLimit - existingValue.count());
                     holder[0] = result;
-                    return null;
+                    return existingValue;
                 }
             }
 
             // client makes request withing time window + has enough tokens
             WindowState element = new WindowState(existingValue.startTimestamp(), existingValue.count() + 1);
             long resetTimeStamp = existingValue.startTimestamp() + timeWindow.get(ChronoUnit.SECONDS);
-            RateLimitResult result = new RateLimitResult(true, resetTimeStamp, tokenLimit - existingValue.count());
+            RateLimitResult result = new RateLimitResult(true, resetTimeStamp, tokenLimit - element.count());
             holder[0] = result;
             return element;
         });
