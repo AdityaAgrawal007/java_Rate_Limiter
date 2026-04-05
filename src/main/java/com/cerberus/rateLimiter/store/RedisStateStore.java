@@ -1,5 +1,6 @@
 package com.cerberus.rateLimiter.store;
 
+import com.cerberus.rateLimiter.algorithm.redis.RedisRateLimitAlgorithm;
 import com.cerberus.rateLimiter.core.RateLimitResult;
 import com.cerberus.rateLimiter.core.StateStore;
 import org.springframework.core.io.ClassPathResource;
@@ -8,33 +9,33 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 
 public class RedisStateStore implements StateStore {
     private final RedisTemplate<String, Object> redisTemplate;
-    private final DefaultRedisScript<List> rateLimitScript;
+    private final RedisRateLimitAlgorithm algorithm;
+    private final DefaultRedisScript<List> script;
 
-    public RedisStateStore(RedisTemplate<String, Object> redisTemplate) throws IOException {
+    public RedisStateStore(RedisTemplate<String, Object> redisTemplate,
+                           RedisRateLimitAlgorithm algorithm) throws IOException {
         this.redisTemplate = redisTemplate;
+        this.algorithm = algorithm;
 
-        // Load Lua script from classpath (relative to resources folder)
-        ClassPathResource resource = new ClassPathResource("rate_limit.lua");
+        ClassPathResource resource = new ClassPathResource(algorithm.getScriptPath());
         String lua = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
-        this.rateLimitScript = new DefaultRedisScript<>();
-        this.rateLimitScript.setScriptText(lua);
-        this.rateLimitScript.setResultType(List.class);
+        this.script = new DefaultRedisScript<>();
+        this.script.setScriptText(lua);
+        this.script.setResultType(List.class);
     }
 
     @Override
-    public RateLimitResult tryConsume(String clientKey, long tokenLimit, Duration timeWindow) {
+    public RateLimitResult tryConsume(String clientKey) {
         List<Long> result = redisTemplate.execute(
-                rateLimitScript,
+                script,
                 Collections.singletonList(clientKey),
-                String.valueOf(tokenLimit),
-                String.valueOf(timeWindow.getSeconds())
+                algorithm.getArgv(clientKey).toArray()
         );
 
         return new RateLimitResult(

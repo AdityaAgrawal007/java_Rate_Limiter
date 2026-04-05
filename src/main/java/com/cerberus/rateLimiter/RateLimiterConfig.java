@@ -1,5 +1,8 @@
 package com.cerberus.rateLimiter;
 
+import com.cerberus.rateLimiter.algorithm.redis.RedisFixedWindowAlgorithm;
+import com.cerberus.rateLimiter.algorithm.redis.RedisRateLimitAlgorithm;
+import com.cerberus.rateLimiter.algorithm.redis.RedisTokenBucketAlgorithm;
 import com.cerberus.rateLimiter.core.RateLimiter;
 import com.cerberus.rateLimiter.core.RateLimiterImpl;
 import com.cerberus.rateLimiter.extractor.IpKeyExtractor;
@@ -8,6 +11,7 @@ import com.cerberus.rateLimiter.store.RedisStateStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -22,8 +26,24 @@ public class RateLimiterConfig implements WebMvcConfigurer {
     private RedisTemplate<String, Object> redisTemplate;
 
     @Bean
+    public RedisRateLimitAlgorithm redisFixedWindowAlgorithm() {
+        return new RedisFixedWindowAlgorithm(10, Duration.ofMinutes(1));
+    }
+
+    @Primary // this annotations makes this defalut bean that will be injected
+    @Bean
+    public RedisRateLimitAlgorithm redisTokenBucketAlgorithm(){
+        return new RedisTokenBucketAlgorithm(5, 1);
+    }
+
+    @Bean
+    public RedisStateStore redisStateStore() throws IOException {
+        return new RedisStateStore(redisTemplate, redisFixedWindowAlgorithm());
+    }
+
+    @Bean
     public RateLimiter rateLimiter() throws IOException {
-        return new RateLimiterImpl(10, Duration.ofMinutes(1), new RedisStateStore(redisTemplate));
+        return new RateLimiterImpl(redisStateStore());
     }
 
     @Bean
