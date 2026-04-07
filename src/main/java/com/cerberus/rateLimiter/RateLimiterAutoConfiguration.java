@@ -9,8 +9,10 @@ import com.cerberus.rateLimiter.extractor.IpKeyExtractor;
 import com.cerberus.rateLimiter.interceptor.RateLimitInterceptor;
 import com.cerberus.rateLimiter.store.RedisStateStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -20,7 +22,9 @@ import java.io.IOException;
 import java.time.Duration;
 
 @Configuration
-public class RateLimiterConfig implements WebMvcConfigurer {
+@EnableConfigurationProperties(RateLimiterProperties.class)
+@Import(com.cerberus.rateLimiter.config.RedisConfig.class)
+public class RateLimiterAutoConfiguration implements WebMvcConfigurer {
     @Autowired
     private RateLimiterProperties rateLimiterProperties;
 
