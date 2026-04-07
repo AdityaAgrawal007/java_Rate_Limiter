@@ -21,24 +21,31 @@ import java.time.Duration;
 
 @Configuration
 public class RateLimiterConfig implements WebMvcConfigurer {
+    @Autowired
+    private RateLimiterProperties rateLimiterProperties;
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
     @Bean
     public RedisRateLimitAlgorithm redisFixedWindowAlgorithm() {
-        return new RedisFixedWindowAlgorithm(10, Duration.ofMinutes(1));
+        return new RedisFixedWindowAlgorithm(rateLimiterProperties.getLimit(), Duration.ofSeconds(rateLimiterProperties.getTimeWindow()));
     }
 
     @Primary // this annotations makes this defalut bean that will be injected
     @Bean
-    public RedisRateLimitAlgorithm redisTokenBucketAlgorithm(){
-        return new RedisTokenBucketAlgorithm(5, 1);
+    public RedisRateLimitAlgorithm redisTokenBucketAlgorithm() {
+        return new RedisTokenBucketAlgorithm(rateLimiterProperties.getMaxTokens(), (int) rateLimiterProperties.getRefillRate());
     }
 
     @Bean
     public RedisStateStore redisStateStore() throws IOException {
-        return new RedisStateStore(redisTemplate, redisFixedWindowAlgorithm());
+        // if more algorithms come we need a different mechanism to do the following if else blocks aren't the best
+        if ("FIXED_WINDOW".equals(rateLimiterProperties.getAlgorithm())) {
+            return new RedisStateStore(redisTemplate, redisFixedWindowAlgorithm());
+        } else {
+            return new RedisStateStore(redisTemplate, redisTokenBucketAlgorithm());
+        }
     }
 
     @Bean

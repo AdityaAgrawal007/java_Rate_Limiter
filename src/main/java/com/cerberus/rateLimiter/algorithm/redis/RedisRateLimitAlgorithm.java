@@ -7,4 +7,8 @@ import java.util.List;
 public interface RedisRateLimitAlgorithm extends RateLimitAlgorithm {
     String getScriptPath();
     List<String> getArgv(String clientKey);
+
+    default String getRedisKey(String clientKey) {
+        return getScriptPath() + ":" + clientKey;
+    }
 }

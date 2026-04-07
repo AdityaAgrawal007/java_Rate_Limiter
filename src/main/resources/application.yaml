@@ -5,3 +5,9 @@ spring:
     redis:
       host: localhost
       port: 6379
+rate-limiter:
+  algorithm: FIXED_WINDOW
+  limit: 10
+  window: 60
+  max-tokens: 3
+  refill-rate: 1

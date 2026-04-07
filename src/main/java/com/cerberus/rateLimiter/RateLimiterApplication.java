@@ -2,7 +2,9 @@ package com.cerberus.rateLimiter;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
+@EnableConfigurationProperties(RateLimiterProperties.class)
 @SpringBootApplication
 public class RateLimiterApplication {
 

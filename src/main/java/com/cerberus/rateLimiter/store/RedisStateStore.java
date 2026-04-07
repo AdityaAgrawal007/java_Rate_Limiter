@@ -25,6 +25,7 @@ public class RedisStateStore implements StateStore {
         ClassPathResource resource = new ClassPathResource(algorithm.getScriptPath());
         String lua = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
+        lua = "-- v2\n" + lua;
         this.script = new DefaultRedisScript<>();
         this.script.setScriptText(lua);
         this.script.setResultType(List.class);
@@ -34,7 +35,8 @@ public class RedisStateStore implements StateStore {
     public RateLimitResult tryConsume(String clientKey) {
         List<Long> result = redisTemplate.execute(
                 script,
-                Collections.singletonList(clientKey),
+                Collections.singletonList(algorithm.getRedisKey(clientKey)), // singleton list return imutable list
+                // containing only specified objects
                 algorithm.getArgv(clientKey).toArray()
         );
 
