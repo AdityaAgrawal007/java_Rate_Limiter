@@ -1,4 +1,4 @@
-// data stored per client key -  window start timestamp, count of requested tokens till now
+// data stored per client key -  window start timestamp, count of requested tokens till now - DEPRECATED DESIGN
 package com.cerberus.rateLimiter.store;
 
 import com.cerberus.rateLimiter.algorithm.RateLimitAlgorithm;
