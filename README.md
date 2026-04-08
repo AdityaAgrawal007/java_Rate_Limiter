@@ -25,6 +25,29 @@ Add to your `pom.xml`:
     <artifactId>rateLimiter</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 </dependency>
+
+```
+## Installation Via JitPack
+
+Add the JitPack repository to your `pom.xml`:
+
+```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+```
+
+Add the dependency:
+
+```xml
+<dependency>
+    <groupId>com.github.AdityaAgrawal007</groupId>
+    <artifactId>java_Rate_Limiter</artifactId>
+    <version>v1.0.0</version>
+</dependency>
 ```
 
 ## Configuration
