@@ -1,4 +1,4 @@
-Cerberus Rate Limiter is a production-grade rate limiting library for Spring Boot applications. Add it as a Maven dependency and your endpoints are protected, no boilerplate configuration classes required. It supports Fixed Window and Token Bucket algorithms, switchable via a single property, backed by Redis for distributed deployments with atomic Lua-script enforcement to prevent race conditions across instances. An in-memory fallback is available for local development.
+Cerberus Rate Limiter is a rate limiting library for Spring Boot applications. Add it as a Maven dependency and your endpoints are protected, no boilerplate configuration classes required. It supports Fixed Window and Token Bucket algorithms, switchable via a single property, backed by Redis for distributed deployments with atomic Lua-script enforcement to prevent race conditions across instances. An in-memory fallback is available for local development.
 ## Features
 
 - **Two rate limiting algorithms** - Fixed Window and Token Bucket, switchable via `application.yml` with no code changes
